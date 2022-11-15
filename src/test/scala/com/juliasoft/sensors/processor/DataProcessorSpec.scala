@@ -1,11 +1,11 @@
 package com.juliasoft.sensors.processor
 
 import com.juliasoft.sensors.core.SensorStat
-import com.juliasoft.sensors.processor.DataProcessorSpec._
+import com.juliasoft.sensors.processor.DataProcessorSpec.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-final class DataProcessorSpec extends AnyFlatSpec with Matchers {
+final class DataProcessorSpec extends AnyFlatSpec with Matchers:
 
   behavior.of("DataProcessor")
 
@@ -20,9 +20,8 @@ final class DataProcessorSpec extends AnyFlatSpec with Matchers {
     val processor = new SimpleDataProcessor
     processor.processData(Seq.empty.iterator, resultMap) shouldBe Map.empty[String, SensorStat]
   }
-}
 
-object DataProcessorSpec {
+object DataProcessorSpec:
 
   private val nonEmptyLines = Seq(
     "sensor-id,humidity",
@@ -42,4 +41,3 @@ object DataProcessorSpec {
     "s2" -> SensorStat(3, 0, Some(78), Some(88), Some(246)),
     "s3" -> SensorStat(0, 1, None, None, None),
   )
-}
