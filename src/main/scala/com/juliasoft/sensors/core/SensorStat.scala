@@ -1,40 +1,38 @@
 package com.juliasoft.sensors.core
 
 import cats.Semigroup
-import cats.implicits._
+import cats.implicits.*
 
 case class SensorStat(
   validMeasurements: Long,
   failedMeasurements: Long,
-  min: Option[Int],
-  max: Option[Int],
+  min: Option[Byte],
+  max: Option[Byte],
   sum: Option[Long],
 )
 
-object SensorStat {
+object SensorStat:
 
   val empty: SensorStat = SensorStat(0, 0, None, None, None)
 
   def processMeasurement(
-    maybeHumidity: Option[Int],
+    maybeHumidity: Option[Byte],
     prev: SensorStat,
   ): SensorStat =
-    maybeHumidity match {
+    maybeHumidity match
       case Some(humidity) =>
         prev.copy(
           validMeasurements = prev.validMeasurements + 1,
-          min = Some(Math.min(humidity, prev.min.getOrElse(humidity))),
-          max = Some(Math.max(humidity, prev.max.getOrElse(humidity))),
-          sum = prev.sum.map(_ + humidity).orElse(Some(humidity.toLong)),
+          min = Some(Math.min(humidity, prev.min.getOrElse(humidity)).toByte),
+          max = Some(Math.max(humidity, prev.max.getOrElse(humidity)).toByte),
+          sum = prev.sum.map(_ + humidity).orElse(Some(humidity)),
         )
       case _ =>
         prev.copy(
           failedMeasurements = prev.failedMeasurements + 1,
         )
-    }
 
-  implicit val sensorStatSemigroup: Semigroup[SensorStat] = new Semigroup[SensorStat] {
-
+  given Semigroup[SensorStat] with
     def combine(x: SensorStat, y: SensorStat): SensorStat =
       SensorStat(
         validMeasurements = x.validMeasurements + y.validMeasurements,
@@ -43,17 +41,13 @@ object SensorStat {
         max = (x.max, y.max).maximum,
         sum = x.sum.combine(y.sum),
       )
-  }
 
-  implicit final class SensorStatOps(val stat: SensorStat) extends AnyVal {
-
+  extension (stat: SensorStat)
     def toResult: SensorResult =
       SensorResult(
         validMeasurements = stat.validMeasurements,
         failedMeasurements = stat.failedMeasurements,
         min = stat.min,
         max = stat.max,
-        average = stat.sum.map(value => (value / stat.validMeasurements).toInt),
+        average = stat.sum.map(value => (value / stat.validMeasurements).toByte),
       )
-  }
-}

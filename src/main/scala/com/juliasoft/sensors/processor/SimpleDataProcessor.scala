@@ -3,7 +3,7 @@ import com.juliasoft.sensors.core.SensorStat
 import com.juliasoft.sensors.core.SensorStat.processMeasurement
 import com.juliasoft.sensors.util.FileUtils
 
-final class SimpleDataProcessor extends DataProcessor {
+final class SimpleDataProcessor extends DataProcessor:
 
   def processData(source: Iterator[String], resultMap: Map[String, SensorStat]): Map[String, SensorStat] =
     source
@@ -15,4 +15,3 @@ final class SimpleDataProcessor extends DataProcessor {
         val sensorResult = map.getOrElse(sensorId, SensorStat.empty)
         map + (sensorId -> processMeasurement(data._2, sensorResult))
       }
-}

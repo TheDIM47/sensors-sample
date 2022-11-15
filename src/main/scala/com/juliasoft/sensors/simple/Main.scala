@@ -7,25 +7,24 @@ import com.juliasoft.sensors.util.FileUtils.getCsvFiles
 import com.juliasoft.sensors.util.FileUtils.helpString
 
 import java.nio.file.Path
+import scala.collection.immutable.Seq
 import scala.io.Source
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Using
 
-object Main {
+object Main:
 
   def main(args: Array[String]): Unit =
-    if (args.length == 0) println(helpString())
-    else {
-      getCsvFiles(args(0)) match {
+    args.headOption.fold(println(helpString())) { path =>
+      getCsvFiles(path) match
         case Success(filesToRead) =>
           println(processSimple(filesToRead))
         case Failure(ex) =>
-          println(s"Unable to read directory ${args(0)}: ${ex.getMessage}")
-      }
+          println(s"Unable to read directory $path: ${ex.getMessage}")
     }
 
-  private def processSimple(filesToRead: Seq[Path]): String = {
+  private def processSimple(filesToRead: Seq[Path]): String =
     val processor = new SimpleDataProcessor
     val results = filesToRead
       .foldLeft(Map.empty[String, SensorStat]) { case (resultMap, path) =>
@@ -36,7 +35,5 @@ object Main {
           Map.empty[String, SensorStat]
         }.getOrElse(Map.empty)
       }
-    val formatter = new ConsoleResultFormatter(filesToRead.size, results.view.mapValues(_.toResult).toMap)
-    formatter.format()
-  }
-}
+    new ConsoleResultFormatter(filesToRead.size, results.view.mapValues(_.toResult).toMap)
+      .format()

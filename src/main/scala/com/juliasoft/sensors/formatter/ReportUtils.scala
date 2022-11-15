@@ -2,7 +2,7 @@ package com.juliasoft.sensors.formatter
 
 import com.juliasoft.sensors.core.SensorResult
 
-object ReportUtils {
+object ReportUtils:
 
   case class Totals(validMeasurements: Long = 0L, failedMeasurements: Long = 0L)
 
@@ -13,4 +13,3 @@ object ReportUtils {
         failedMeasurements = total.failedMeasurements + entry._2.failedMeasurements,
       )
     }
-}

@@ -2,9 +2,9 @@ package com.juliasoft.sensors.akka
 
 import akka.actor.ActorSystem
 import akka.stream.SystemMaterializer
-import akka.stream.scaladsl._
+import akka.stream.scaladsl.*
 import akka.util.ByteString
-import cats.implicits._
+import cats.implicits.*
 import cats.implicits.catsSyntaxSemigroup
 import com.juliasoft.sensors.core.SensorStat
 import com.juliasoft.sensors.core.SensorStat.processMeasurement
@@ -14,27 +14,26 @@ import com.juliasoft.sensors.util.FileUtils.helpString
 import com.juliasoft.sensors.util.FileUtils.parseString
 
 import java.nio.file.Path
+import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.util.Failure
 import scala.util.Success
 
-object Main {
+object Main:
   private val maxFrameLength = 1024
   private val delimiter = Framing.delimiter(ByteString(System.lineSeparator()), maxFrameLength, allowTruncation = true)
 
   def main(args: Array[String]): Unit =
-    if (args.length == 0) println(helpString())
-    else {
-      getCsvFiles(args(0)) match {
+    args.headOption.fold(println(helpString())) { path =>
+      getCsvFiles(path) match
         case Success(filesToRead) =>
           processWithAkkaStreams(filesToRead)
         case Failure(ex) =>
-          println(s"Unable to read directory ${ex.getMessage}")
-      }
+          println(s"Unable to read directory $path: ${ex.getMessage}")
     }
 
-  private def processWithAkkaStreams(filesToRead: Seq[Path]): Unit = {
+  private def processWithAkkaStreams(filesToRead: Seq[Path]): Unit =
     implicit val executionContext: ExecutionContext = ExecutionContext.global
     implicit val actorSystem: ActorSystem = ActorSystem()
     implicit val actorMaterializer: SystemMaterializer = SystemMaterializer(actorSystem)
@@ -50,7 +49,7 @@ object Main {
               resultMap + (sensorId -> processMeasurement(data._2, sensorResult))
             }
         }
-        summary <- Future.successful(dataResults.foldLeft(Map.empty[String, SensorStat])(_ combine _))
+        summary = dataResults.foldLeft(Map.empty[String, SensorStat])(_ combine _)
         formatter = new ConsoleResultFormatter(filesToRead.size, summary.view.mapValues(_.toResult).toMap)
       } yield formatter.format()
     ).map(actorSystem.log.info)
@@ -60,5 +59,3 @@ object Main {
         actorMaterializer.materializer.shutdown()
         actorSystem.terminate()
       }
-  }
-}

@@ -1,6 +1,6 @@
 package com.juliasoft.sensors.future
 
-import cats.implicits._
+import cats.implicits.*
 import cats.implicits.catsSyntaxSemigroup
 import com.juliasoft.sensors.core.SensorStat
 import com.juliasoft.sensors.formatter.ConsoleResultFormatter
@@ -10,6 +10,7 @@ import com.juliasoft.sensors.util.FileUtils.helpString
 
 import java.nio.file.Path
 import java.util.concurrent.Executors
+import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.io.Source
@@ -17,12 +18,11 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Using
 
-object Main {
+object Main:
 
   def main(args: Array[String]): Unit =
-    if (args.length == 0) println(helpString())
-    else {
-      getCsvFiles(args(0)) match {
+    args.headOption.fold(println(helpString())) { path =>
+      getCsvFiles(path) match
         case Success(filesToRead) =>
           val executor = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors())
           implicit val executionContext: ExecutionContext = ExecutionContext.fromExecutor(executor)
@@ -30,8 +30,7 @@ object Main {
             .map(println)
             .foreach(_ => executor.shutdown())
         case Failure(ex) =>
-          println(s"Unable to read directory ${args(0)}: ${ex.getMessage}")
-      }
+          println(s"Unable to read directory $path: ${ex.getMessage}")
     }
 
   private def processWithFuture(filesToRead: Seq[Path])(implicit ec: ExecutionContext): Future[String] =
@@ -47,7 +46,6 @@ object Main {
           }.getOrElse(Map.empty[String, SensorStat])
         }
       }
-      summary <- Future.successful(dataResults.foldLeft(Map.empty[String, SensorStat])(_ combine _))
+      summary = dataResults.foldLeft(Map.empty[String, SensorStat])(_ combine _)
       formatter = new ConsoleResultFormatter(filesToRead.size, summary.view.mapValues(_.toResult).toMap)
     } yield formatter.format()
-}

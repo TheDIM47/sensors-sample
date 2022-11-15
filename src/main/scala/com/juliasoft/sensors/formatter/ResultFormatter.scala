@@ -1,6 +1,5 @@
 package com.juliasoft.sensors.formatter
 
-trait ResultFormatter[A] {
+trait ResultFormatter[A]:
 
   def format(): A
-}

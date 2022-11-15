@@ -1,11 +1,11 @@
 package com.juliasoft.sensors.formatter
 
 import com.juliasoft.sensors.core.SensorResult
-import com.juliasoft.sensors.formatter.ConsoleResultFormatterSpec._
+import com.juliasoft.sensors.formatter.ConsoleResultFormatterSpec.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-final class ConsoleResultFormatterSpec extends AnyFlatSpec with Matchers {
+final class ConsoleResultFormatterSpec extends AnyFlatSpec with Matchers:
 
   behavior.of("ConsoleResultFormatter")
 
@@ -20,9 +20,8 @@ final class ConsoleResultFormatterSpec extends AnyFlatSpec with Matchers {
     val result = formatter.format()
     result shouldBe expectedEmptyReport
   }
-}
 
-object ConsoleResultFormatterSpec {
+object ConsoleResultFormatterSpec:
 
   private val emptyFilesProcessed = 0
   private val nonEmptyFilesProcessed = 2
@@ -56,4 +55,3 @@ object ConsoleResultFormatterSpec {
       |
       |sensor-id,min,avg,max
       |""".stripMargin
-}
